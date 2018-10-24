@@ -2,6 +2,7 @@ package com.firebase.uidemo.database.realtime;
 
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -45,6 +46,7 @@ public class RealtimeDbChatActivity extends AppCompatActivity
     /**
      * Get the last 50 chat messages.
      */
+    @NonNull
     protected static final Query sChatQuery =
             FirebaseDatabase.getInstance().getReference().child("chats").limitToLast(50);
 
@@ -61,7 +63,7 @@ public class RealtimeDbChatActivity extends AppCompatActivity
     TextView mEmptyListMessage;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat);
         ButterKnife.bind(this);
@@ -131,6 +133,7 @@ public class RealtimeDbChatActivity extends AppCompatActivity
         mMessageEdit.setText("");
     }
 
+    @NonNull
     protected RecyclerView.Adapter newAdapter() {
         FirebaseRecyclerOptions<Chat> options =
                 new FirebaseRecyclerOptions.Builder<Chat>()
@@ -158,7 +161,7 @@ public class RealtimeDbChatActivity extends AppCompatActivity
         };
     }
 
-    protected void onAddMessage(Chat chat) {
+    protected void onAddMessage(@NonNull Chat chat) {
         sChatQuery.getRef().push().setValue(chat, new DatabaseReference.CompletionListener() {
             @Override
             public void onComplete(DatabaseError error, DatabaseReference reference) {

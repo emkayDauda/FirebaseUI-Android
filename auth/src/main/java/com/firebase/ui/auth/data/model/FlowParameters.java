@@ -14,7 +14,6 @@
 package com.firebase.ui.auth.data.model;
 
 import android.content.Intent;
-import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.support.annotation.DrawableRes;
@@ -22,6 +21,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.RestrictTo;
 import android.support.annotation.StyleRes;
+import android.text.TextUtils;
 
 import com.firebase.ui.auth.AuthUI.IdpConfig;
 import com.firebase.ui.auth.util.ExtraConstants;
@@ -40,7 +40,7 @@ public class FlowParameters implements Parcelable {
     public final String appName;
 
     @NonNull
-    public final List<IdpConfig> providerInfo;
+    public final List<IdpConfig> providers;
 
     @StyleRes
     public final int themeId;
@@ -56,61 +56,52 @@ public class FlowParameters implements Parcelable {
 
     public final boolean enableCredentials;
     public final boolean enableHints;
+    public final boolean enableAnonymousUpgrade;
+    public final boolean alwaysShowProviderChoice;
 
     public FlowParameters(
             @NonNull String appName,
-            @NonNull List<IdpConfig> providerInfo,
+            @NonNull List<IdpConfig> providers,
             @StyleRes int themeId,
             @DrawableRes int logoId,
             @Nullable String termsOfServiceUrl,
             @Nullable String privacyPolicyUrl,
             boolean enableCredentials,
-            boolean enableHints) {
+            boolean enableHints,
+            boolean enableAnonymousUpgrade,
+            boolean alwaysShowProviderChoice) {
         this.appName = Preconditions.checkNotNull(appName, "appName cannot be null");
-        this.providerInfo = Collections.unmodifiableList(
-                Preconditions.checkNotNull(providerInfo, "providerInfo cannot be null"));
+        this.providers = Collections.unmodifiableList(
+                Preconditions.checkNotNull(providers, "providers cannot be null"));
         this.themeId = themeId;
         this.logoId = logoId;
         this.termsOfServiceUrl = termsOfServiceUrl;
         this.privacyPolicyUrl = privacyPolicyUrl;
         this.enableCredentials = enableCredentials;
         this.enableHints = enableHints;
+        this.enableAnonymousUpgrade = enableAnonymousUpgrade;
+        this.alwaysShowProviderChoice = alwaysShowProviderChoice;
     }
 
     /**
      * Extract FlowParameters from an Intent.
      */
     public static FlowParameters fromIntent(Intent intent) {
-        return intent.getParcelableExtra(ExtraConstants.EXTRA_FLOW_PARAMS);
-    }
-
-    /**
-     * Extract FlowParameters from a Bundle.
-     */
-    public static FlowParameters fromBundle(Bundle bundle) {
-        return bundle.getParcelable(ExtraConstants.EXTRA_FLOW_PARAMS);
-    }
-
-    /**
-     * Create a bundle containing this FlowParameters object as {@link
-     * ExtraConstants#EXTRA_FLOW_PARAMS}.
-     */
-    public Bundle toBundle() {
-        Bundle bundle = new Bundle();
-        bundle.putParcelable(ExtraConstants.EXTRA_FLOW_PARAMS, this);
-        return bundle;
+        return intent.getParcelableExtra(ExtraConstants.FLOW_PARAMS);
     }
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(appName);
-        dest.writeTypedList(providerInfo);
+        dest.writeTypedList(providers);
         dest.writeInt(themeId);
         dest.writeInt(logoId);
         dest.writeString(termsOfServiceUrl);
         dest.writeString(privacyPolicyUrl);
         dest.writeInt(enableCredentials ? 1 : 0);
         dest.writeInt(enableHints ? 1 : 0);
+        dest.writeInt(enableAnonymousUpgrade ? 1 : 0);
+        dest.writeInt(alwaysShowProviderChoice ? 1 : 0);
     }
 
     @Override
@@ -129,6 +120,8 @@ public class FlowParameters implements Parcelable {
             String privacyPolicyUrl = in.readString();
             boolean enableCredentials = in.readInt() != 0;
             boolean enableHints = in.readInt() != 0;
+            boolean enableAnonymousUpgrade = in.readInt() != 0;
+            boolean alwaysShowProviderChoice = in.readInt() != 0;
 
             return new FlowParameters(
                     appName,
@@ -138,7 +131,9 @@ public class FlowParameters implements Parcelable {
                     termsOfServiceUrl,
                     privacyPolicyUrl,
                     enableCredentials,
-                    enableHints);
+                    enableHints,
+                    enableAnonymousUpgrade,
+                    alwaysShowProviderChoice);
         }
 
         @Override
@@ -146,4 +141,24 @@ public class FlowParameters implements Parcelable {
             return new FlowParameters[size];
         }
     };
+
+    public boolean isSingleProviderFlow() {
+        return providers.size() == 1;
+    }
+
+    public boolean isTermsOfServiceUrlProvided() {
+        return !TextUtils.isEmpty(termsOfServiceUrl);
+    }
+
+    public boolean isPrivacyPolicyUrlProvided() {
+        return !TextUtils.isEmpty(privacyPolicyUrl);
+    }
+
+    public boolean isAnonymousUpgradeEnabled() {
+        return enableAnonymousUpgrade;
+    }
+
+    public boolean shouldShowProviderChoice() {
+        return !isSingleProviderFlow() || alwaysShowProviderChoice;
+    }
 }

@@ -1,2 +1,14 @@
-include ':app', ':library', ':database', ':auth', ':storage', ':firestore', ':common',
-        ':internal:lint', ':internal:lintchecks'
+rootProject.buildFileName = 'build.gradle.kts'
+
+include(
+        ":app", ":library",
+
+        ":auth", ":auth-github",
+        ":common", ":firestore", ":database",
+        ":storage",
+
+
+        ":lint",
+
+        ":proguard-tests", ":internal:lint", ":internal:lintchecks"
+)

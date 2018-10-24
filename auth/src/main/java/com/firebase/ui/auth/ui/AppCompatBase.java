@@ -15,17 +15,17 @@
 package com.firebase.ui.auth.ui;
 
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.annotation.RestrictTo;
 
 import com.firebase.ui.auth.R;
 
-@SuppressWarnings("Registered")
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-public class AppCompatBase extends HelperActivityBase {
+public abstract class AppCompatBase extends HelperActivityBase {
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setTheme(R.style.FirebaseUI); // Provides default values
-        setTheme(getFlowHolder().getArguments().themeId);
+        setTheme(getFlowParams().themeId);
     }
 }
